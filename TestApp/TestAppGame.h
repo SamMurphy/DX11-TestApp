@@ -84,6 +84,9 @@ private:
 	ID3D11InputLayout* mpLayout;
 	ID3D11Buffer* mpVBO;
 
+	ID3D11VertexShader* mpVertexShaderPfx;
+	ID3D11PixelShader* mpPixelShaderPfx;
+
 	//D3D Objects To Create Into
 	ID3D11Texture2D* mpTexture2D = NULL;
 	ID3D11RenderTargetView*	mpRenderTargetView = NULL;
@@ -98,5 +101,7 @@ private:
 	bool mbScreenStateChanged;
 	bool mbResolutionChanged;
 	bool mbBorderless;
+
+	bool mbPostFx;
 };
 

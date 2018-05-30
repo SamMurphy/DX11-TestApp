@@ -51,6 +51,10 @@ public:
 
 	int GetNumberOfMonitors();
 
+	ID3D11DepthStencilView* GetDepthStencilView() { return _depthStencilView; }
+	ID3D11RenderTargetView* GetBackBuffer() { return _backbuffer; }
+	ID3D11RenderTargetView** GetAddressOfBackBuffer() { return &_backbuffer; }
+
 protected:
 	/// The game window.
 	Window_DX * _window;

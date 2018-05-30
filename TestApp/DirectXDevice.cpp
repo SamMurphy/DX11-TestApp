@@ -68,12 +68,14 @@ void DirectXDevice::Initialise(int width, int height)
 
 	D3D_FEATURE_LEVEL feature = D3D_FEATURE_LEVEL_11_0;
 
+	UINT flags = D3D11_CREATE_DEVICE_DEBUG;
+
 	HRESULT hr;
 	// create a device, device context and swap chain using the information in the scd struct
 	hr = D3D11CreateDeviceAndSwapChain(NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
-		0,
+		flags,
 		&feature,
 		1,
 		D3D11_SDK_VERSION,
@@ -201,6 +203,7 @@ void DirectXDevice::ClearScreen()
 void DirectXDevice::SwapBuffers()
 {
 #if defined D_USE_IMGUI
+	_context->OMSetRenderTargets(1, &_backbuffer, _depthStencilView);
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 #endif
@@ -256,7 +259,7 @@ void DirectXDevice::EnableWireFrame(bool enable)
 */
 void DirectXDevice::EnableDepthBuffering(bool enable)
 {
-	if (enable = true)
+	if (enable)
 	{
 		// turn on
 		_context->OMSetDepthStencilState(_depthStencilState, 1);
@@ -354,15 +357,18 @@ void DirectXDevice::ConfigureBackBuffer(float width, float height)
 	ZeroMemory(&depthDisableStencilDesc, sizeof(depthDisableStencilDesc));
 
 	depthDisableStencilDesc.DepthEnable = false;
-	depthDisableStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthDisableStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-	depthDisableStencilDesc.StencilEnable = true;
+	depthDisableStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	depthDisableStencilDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
+
+	depthDisableStencilDesc.StencilEnable = false;
 	depthDisableStencilDesc.StencilReadMask = 0xFF;
 	depthDisableStencilDesc.StencilWriteMask = 0xFF;
+
 	depthDisableStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	depthDisableStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
 	depthDisableStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthDisableStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
 	depthDisableStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	depthDisableStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
 	depthDisableStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;

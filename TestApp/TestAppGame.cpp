@@ -20,6 +20,9 @@
 #include "PixelShader.h"
 #include "VertexShader.h"
 
+#include "PixelShaderPfx.h"
+#include "VertexShaderPfx.h"
+
 #include "Hitable.h"
 #include "Camera.h"
 
@@ -70,9 +73,10 @@ void TestAppGame::Initialise(Window_DX * win)
 void TestAppGame::LoadAssets()
 {
 	// Create texture to render
+	static const int TextureWidth = 100;
 	D3D11_TEXTURE2D_DESC textureDesc;
-	textureDesc.Width = GetWindow()->GetWidth();
-	textureDesc.Height = GetWindow()->GetHeight();
+	textureDesc.Width = TextureWidth;
+	textureDesc.Height = TextureWidth;
 	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
@@ -89,6 +93,37 @@ void TestAppGame::LoadAssets()
 	result = mpDirectX->GetDevice()->CreateShaderResourceView(mpTexture, NULL, &mpTextureSRV);
 	_ASSERT(result == S_OK);
 
+	float data[TextureWidth * TextureWidth * 4] = {};
+	for (int y = 0; y < TextureWidth; y++)
+	{
+		for (int x = 0; x < TextureWidth * 4; x += 4)
+		{
+			int i = (y * TextureWidth * 4) + x;
+			data[i]		= x / ((float)TextureWidth * 4.0f);
+			data[i + 1] = 1 - (y / ((float)TextureWidth));
+			data[i + 2] = 0;
+			data[i + 3] = 1.0f;
+		}
+	}
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	result = mpDirectX->GetContext()->Map(mpTexture, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	_ASSERT(result == S_OK);
+
+	float* pixels = (&data[0]);
+	int RowSize = TextureWidth * 4 * sizeof(float);
+	BYTE* mappedData = reinterpret_cast<BYTE*>(mappedResource.pData);
+	for (UINT i = 0; i < TextureWidth; i++)
+	{
+		memcpy(mappedData, pixels, RowSize);
+		mappedData += mappedResource.RowPitch;
+		pixels += TextureWidth * 4;
+	}
+
+	mpDirectX->GetContext()->Unmap(mpTexture, 0);
+
+
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -103,12 +138,12 @@ void TestAppGame::LoadAssets()
 	result = mpDirectX->GetDevice()->CreateSamplerState(&samplerDesc, &mpSamplerState);
 
 	// Init the geometry - full screen quad
-	Quad[0] = { 1.0f, -1.0f, 0.0f, 0.0f, 0.0f };
-	Quad[1] = { -1.0f, -1.0f, 0.0f, 1.0f, 0.0f };
-	Quad[2] = { -1.0f,  1.0f, 0.0f, 1.0f, 1.0f };
-	Quad[3] = { 1.0f,  1.0f, 0.0f, 0.0f, 1.0f };
-	Quad[4] = { 1.0f, -1.0f, 0.0f, 0.0f, 0.0f };
-	Quad[5] = { -1.0f,  1.0f, 0.0f, 1.0f, 1.0f };
+	Quad[0] = { 1.0f, -1.0f, 0.0f, 1.0f, 1.0f };
+	Quad[1] = { -1.0f, -1.0f, 0.0f, 0.0f, 1.0f };
+	Quad[2] = { -1.0f,  1.0f, 0.0f, 0.0f, 0.0f };
+	Quad[3] = { 1.0f,  1.0f, 0.0f, 1.0f, 0.0f };
+	Quad[4] = { 1.0f, -1.0f, 0.0f, 1.0f, 1.0f };
+	Quad[5] = { -1.0f,  1.0f, 0.0f, 0.0f, 0.0f };
 
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
@@ -129,6 +164,12 @@ void TestAppGame::LoadAssets()
 	result = mpDirectX->GetDevice()->CreatePixelShader(PixelShader, sizeof(PixelShader), NULL, &mpPixelShader);
 	_ASSERT(result == S_OK);
 
+	result = mpDirectX->GetDevice()->CreateVertexShader(VertexShaderPfx, sizeof(VertexShaderPfx), NULL, &mpVertexShaderPfx);
+	_ASSERT(result == S_OK);
+	result = mpDirectX->GetDevice()->CreatePixelShader(PixelShaderPfx, sizeof(PixelShaderPfx), NULL, &mpPixelShaderPfx);
+	_ASSERT(result == S_OK);
+
+
 	// set the shader objects
 	mpDirectX->GetContext()->VSSetShader(mpVertexShader, 0, 0);
 	mpDirectX->GetContext()->PSSetShader(mpPixelShader, 0, 0);
@@ -147,6 +188,8 @@ void TestAppGame::LoadAssets()
 	mbFullscreen = false;
 	mbScreenStateChanged = false;
 	mbResolutionChanged = false;
+
+	mbPostFx = true;
 
 	width = SCREEN_WIDTH;
 	height = SCREEN_HEIGHT;
@@ -289,6 +332,11 @@ void TestAppGame::Update(float deltaTime)
 		ImGui::SetNextWindowBgAlpha(0.5f);
 		GlobalSettings::Settings().imGuiAppLog.Draw("Logger", &GlobalSettings::Settings().renderLog);
 	}
+
+	if (ImGui::Button("Toggle PostFx"))
+	{
+		mbPostFx = !mbPostFx;
+	}
 #endif
 }
 
@@ -299,6 +347,15 @@ void TestAppGame::Update(float deltaTime)
 void TestAppGame::Render(float deltaTime)
 {
 	mpDirectX->ClearScreen();
+
+	mpDirectX->EnableDepthBuffering(false);
+
+	// First Pass
+	// set the shader objects
+	mpDirectX->GetContext()->VSSetShader(mpVertexShader, 0, 0);
+	mpDirectX->GetContext()->PSSetShader(mpPixelShader, 0, 0);
+
+	mpDirectX->GetContext()->OMSetRenderTargets(1, mpRenderTargets[ColourBuffer]->GetAddressOfRenderTargetView(), mpDirectX->GetDepthStencilView());
 
 	mpDirectX->GetContext()->PSSetSamplers(0, 1, &mpSamplerState);
 	mpDirectX->GetContext()->PSSetShaderResources(0, 1, &mpTextureSRV);
@@ -311,7 +368,47 @@ void TestAppGame::Render(float deltaTime)
 	// draw the vertex buffer to the back buffer
 	mpDirectX->GetContext()->Draw(6, 0);
 
+	// Second Pass
+	if (mbPostFx)
+	{
+		// set the shader objects
+		mpDirectX->GetContext()->VSSetShader(mpVertexShaderPfx, 0, 0);
+		mpDirectX->GetContext()->PSSetShader(mpPixelShaderPfx, 0, 0);
+		mpDirectX->GetContext()->OMSetRenderTargets(1, mpRenderTargets[PostFx]->GetAddressOfRenderTargetView(), mpDirectX->GetDepthStencilView());
+
+		mpDirectX->GetContext()->PSSetSamplers(0, 1, &mpSamplerState);
+		mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpRenderTargets[ColourBuffer]->GetAddressOfShaderResourceView());
+
+		mpDirectX->GetContext()->IASetVertexBuffers(0, 1, &mpVBO, &stride, &offset);
+		// select primitive type
+		mpDirectX->GetContext()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		// draw the vertex buffer to the back buffer
+		mpDirectX->GetContext()->Draw(6, 0);
+	}
+
+	// Final Pass
+	// set the shader objects
+	mpDirectX->GetContext()->VSSetShader(mpVertexShader, 0, 0);
+	mpDirectX->GetContext()->PSSetShader(mpPixelShader, 0, 0);
+
+	mpDirectX->GetContext()->OMSetRenderTargets(1, mpDirectX->GetAddressOfBackBuffer(), mpDirectX->GetDepthStencilView());
+
+	mpDirectX->GetContext()->PSSetSamplers(0, 1, &mpSamplerState);
+	if (mbPostFx)
+		mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpRenderTargets[PostFx]->GetAddressOfShaderResourceView());
+	else
+		mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpRenderTargets[ColourBuffer]->GetAddressOfShaderResourceView());
+
+	mpDirectX->GetContext()->IASetVertexBuffers(0, 1, &mpVBO, &stride, &offset);
+	// select primitive type
+	mpDirectX->GetContext()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	// draw the vertex buffer to the back buffer
+	mpDirectX->GetContext()->Draw(6, 0);
+
+	// Present
 	mpDirectX->SwapBuffers();
+
+	mpDirectX->GetContext()->PSSetShaderResources(0, 1, &mpTextureSRV);
 
 	if (mbScreenStateChanged)
 	{
