@@ -31,6 +31,8 @@
 #include "Log.h"
 #include "Globals.h"
 
+#include <dxgidebug.h>
+
 
 TestAppGame::TestAppGame() : Game()
 {
@@ -193,6 +195,13 @@ void TestAppGame::LoadAssets()
 
 	width = SCREEN_WIDTH;
 	height = SCREEN_HEIGHT;
+
+	ID3D11Debug* debugDev;
+	IDXGIDebug* debug;
+	mpDirectX->GetDevice()->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debug));
+
+	debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
+
 }
 
 /**

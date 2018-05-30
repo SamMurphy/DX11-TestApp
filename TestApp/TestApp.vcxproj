@@ -151,6 +151,7 @@
     <ClInclude Include="Log.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="TestAppGame.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Window_DX.h" />
   </ItemGroup>
@@ -164,6 +165,7 @@
     <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="TestApp.cpp" />
     <ClCompile Include="TestAppGame.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Window_DX.cpp" />
   </ItemGroup>
