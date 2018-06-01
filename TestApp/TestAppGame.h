@@ -17,6 +17,8 @@
 #include "RenderTarget.h"
 #include <vector>
 
+#include "Texture.h"
+
 // Forward declarations
 class DirectXDevice;
 
@@ -75,8 +77,7 @@ private:
 	RenderTarget* mpRenderTargets[RT::Count];
 
 	// DirectX Stuff
-	ID3D11Texture2D* mpTexture;
-	ID3D11ShaderResourceView* mpTextureSRV;
+	Texture* mpGradientTexture;
 	ID3D11SamplerState* mpSamplerState;
 
 	ID3D11VertexShader* mpVertexShader;

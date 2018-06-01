@@ -74,25 +74,14 @@ void TestAppGame::LoadAssets()
 {
 	// Create texture to render
 	static const int TextureWidth = 100;
-	D3D11_TEXTURE2D_DESC textureDesc;
-	textureDesc.Width = TextureWidth;
-	textureDesc.Height = TextureWidth;
-	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	textureDesc.MiscFlags = 0;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.SampleDesc.Quality = 0;
-	textureDesc.Usage = D3D11_USAGE_DYNAMIC;
+	mpGradientTexture = new Texture();
+	mpGradientTexture->SetDimensions(TextureWidth, TextureWidth);
+	mpGradientTexture->SetFormat(DXGI_FORMAT_R32G32B32A32_FLOAT);
+	mpGradientTexture->SetBindFlags(D3D11_BIND_SHADER_RESOURCE);
+	mpGradientTexture->SetCPUAccessFlags(D3D11_CPU_ACCESS_WRITE);
+	mpGradientTexture->Initialise(mpDirectX);
 
-	HRESULT result = mpDirectX->GetDevice()->CreateTexture2D(&textureDesc, NULL, &mpTexture);
-	_ASSERT(result == S_OK);
-	// Create shader resource view
-	result = mpDirectX->GetDevice()->CreateShaderResourceView(mpTexture, NULL, &mpTextureSRV);
-	_ASSERT(result == S_OK);
-
+	// Create gradient data
 	float data[TextureWidth * TextureWidth * 4] = {};
 	for (int y = 0; y < TextureWidth; y++)
 	{
@@ -106,24 +95,9 @@ void TestAppGame::LoadAssets()
 		}
 	}
 
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	result = mpDirectX->GetContext()->Map(mpTexture, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	_ASSERT(result == S_OK);
+	mpGradientTexture->CopyDataIntoTexture(mpDirectX, reinterpret_cast<BYTE*>(&data[0]), TextureWidth * 4 * sizeof(float));
 
-	float* pixels = (&data[0]);
-	int RowSize = TextureWidth * 4 * sizeof(float);
-	BYTE* mappedData = reinterpret_cast<BYTE*>(mappedResource.pData);
-	for (UINT i = 0; i < TextureWidth; i++)
-	{
-		memcpy(mappedData, pixels, RowSize);
-		mappedData += mappedResource.RowPitch;
-		pixels += TextureWidth * 4;
-	}
-
-	mpDirectX->GetContext()->Unmap(mpTexture, 0);
-
-
+	// Create a sampler
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -135,8 +109,9 @@ void TestAppGame::LoadAssets()
 	samplerDesc.MinLOD = -FLT_MAX;
 	samplerDesc.MaxLOD = FLT_MAX;
 
-	result = mpDirectX->GetDevice()->CreateSamplerState(&samplerDesc, &mpSamplerState);
+	HRESULT result = mpDirectX->GetDevice()->CreateSamplerState(&samplerDesc, &mpSamplerState);
 
+	// GEOMERTRY
 	// Init the geometry - full screen quad
 	Quad[0] = { 1.0f, -1.0f, 0.0f, 1.0f, 1.0f };
 	Quad[1] = { -1.0f, -1.0f, 0.0f, 0.0f, 1.0f };
@@ -157,7 +132,9 @@ void TestAppGame::LoadAssets()
 	vertexData.SysMemSlicePitch = 0;
 	result = mpDirectX->GetDevice()->CreateBuffer(&bd, &vertexData, &mpVBO);
 	_ASSERT(result == S_OK);
+	// END OF GEOMETRY
 	
+	// SHADERS
 	// Create shader
 	result = mpDirectX->GetDevice()->CreateVertexShader(VertexShader, sizeof(VertexShader), NULL, &mpVertexShader);
 	_ASSERT(result == S_OK);
@@ -169,7 +146,6 @@ void TestAppGame::LoadAssets()
 	result = mpDirectX->GetDevice()->CreatePixelShader(PixelShaderPfx, sizeof(PixelShaderPfx), NULL, &mpPixelShaderPfx);
 	_ASSERT(result == S_OK);
 
-
 	// set the shader objects
 	mpDirectX->GetContext()->VSSetShader(mpVertexShader, 0, 0);
 	mpDirectX->GetContext()->PSSetShader(mpPixelShader, 0, 0);
@@ -180,10 +156,11 @@ void TestAppGame::LoadAssets()
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-
 	result = mpDirectX->GetDevice()->CreateInputLayout(ied, 2, VertexShader, sizeof(VertexShader), &mpLayout);
 	_ASSERT(result == S_OK);
 	mpDirectX->GetContext()->IASetInputLayout(mpLayout);
+
+
 
 	mbFullscreen = false;
 	mbScreenStateChanged = false;
@@ -257,8 +234,6 @@ void TestAppGame::OnKeypress(int key, bool down)
 void TestAppGame::Update(float deltaTime)
 {
 	//LOG_INFO << "FPS: " << 1.0f / deltaTime;
-
-
 
 #if defined D_USE_IMGUI
 	if (ImGui::Button("Create Render Target"))
@@ -358,7 +333,7 @@ void TestAppGame::Render(float deltaTime)
 	mpDirectX->GetContext()->OMSetRenderTargets(1, mpRenderTargets[ColourBuffer]->GetAddressOfRenderTargetView(), mpDirectX->GetDepthStencilView());
 
 	mpDirectX->GetContext()->PSSetSamplers(0, 1, &mpSamplerState);
-	mpDirectX->GetContext()->PSSetShaderResources(0, 1, &mpTextureSRV);
+	mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpGradientTexture->GetAddressOfShaderResourceView());
 
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
@@ -408,7 +383,7 @@ void TestAppGame::Render(float deltaTime)
 	// Present
 	mpDirectX->SwapBuffers();
 
-	mpDirectX->GetContext()->PSSetShaderResources(0, 1, &mpTextureSRV);
+	mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpGradientTexture->GetAddressOfShaderResourceView());
 
 	if (mbScreenStateChanged)
 	{
@@ -495,17 +470,9 @@ void TestAppGame::CreateRenderTarget()
 
 void TestAppGame::DestroyRenderTarget()
 {
-	if (mpTexture2D)
-	{
-		mpTexture2D->Release();
-		mpTexture2D = nullptr;
-	}
-
-	if (mpShaderResourceView)
-	{
-		mpShaderResourceView->Release();
-		mpShaderResourceView = nullptr;
-	}
+	mpGradientTexture->Release();
+	delete mpGradientTexture;
+	mpGradientTexture = nullptr;
 
 	if (mpRenderTargetView)
 	{
