@@ -1,3 +1,4 @@
+#pragma once
 #include "Texture.h"
 #include "Globals.h"
 #include <crtdbg.h> 
@@ -7,7 +8,8 @@ Texture::Texture() :
 	miHeight(1024),
 	mFormat(DXGI_FORMAT_R8G8B8A8_UNORM),
 	miBindFlags(0),
-	miCPUAccessFlags(0)
+	miCPUAccessFlags(0),
+	meUsage(D3D11_USAGE_DYNAMIC)
 {
 }
 
@@ -19,24 +21,29 @@ Texture::~Texture()
 
 bool Texture::Initialise(DirectXDevice* device)
 {
-	D3D11_TEXTURE2D_DESC textureDesc;
+	D3D11_TEXTURE2D_DESC textureDesc = {};
 	textureDesc.Width = miWidth;
 	textureDesc.Height = miHeight;
 	textureDesc.Format = mFormat;
 	textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
-	textureDesc.BindFlags = miBindFlags;// D3D11_BIND_SHADER_RESOURCE;
-	textureDesc.CPUAccessFlags = miCPUAccessFlags;//D3D11_CPU_ACCESS_WRITE;
+	textureDesc.BindFlags = miBindFlags;
+	textureDesc.CPUAccessFlags = miCPUAccessFlags;
 	textureDesc.MiscFlags = 0;
 	textureDesc.SampleDesc.Count = 1;
 	textureDesc.SampleDesc.Quality = 0;
-	textureDesc.Usage = D3D11_USAGE_DYNAMIC;
+	textureDesc.Usage = meUsage;
 
 	// Create Texture
 	HRESULT result = device->GetDevice()->CreateTexture2D(&textureDesc, NULL, &mpTexture);
 	_ASSERT(result == S_OK);
 	// Create shader resource view
-	result = device->GetDevice()->CreateShaderResourceView(mpTexture, NULL, &mpTextureSRV);
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
+	shaderResourceViewDesc.Format = mFormat;
+	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+	result = device->GetDevice()->CreateShaderResourceView(mpTexture, &shaderResourceViewDesc, &mpTextureSRV);
 	_ASSERT(result == S_OK);
 
 	return (result == S_OK);

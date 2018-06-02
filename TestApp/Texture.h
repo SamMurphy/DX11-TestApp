@@ -8,8 +8,8 @@ public:
 	Texture();
 	virtual ~Texture();
 
-	bool Initialise(DirectXDevice* device);
-	bool Release();
+	virtual bool Initialise(DirectXDevice* device);
+	virtual bool Release();
 
 	ID3D11Texture2D* GetTexture() { return mpTexture; }
 	ID3D11Texture2D** GetAddressOfTexture() { return &mpTexture; }
@@ -33,8 +33,8 @@ protected:
 	DXGI_FORMAT mFormat;
 	UINT miBindFlags;
 	UINT miCPUAccessFlags;
+	D3D11_USAGE meUsage;
 
 	ID3D11Texture2D* mpTexture;
 	ID3D11ShaderResourceView* mpTextureSRV;
 };
-

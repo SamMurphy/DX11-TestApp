@@ -57,6 +57,7 @@ void TestAppGame::Initialise(Window_DX * win)
 	for (int i = 0; i < RT::Count; i++)
 	{
 		mpRenderTargets[i] = new RenderTarget();
+		mpRenderTargets[i]->SetDimensionsToFullscreen();
 		mpRenderTargets[i]->Initialise(mpDirectX);
 	}
 
