@@ -156,10 +156,13 @@
     <ClInclude Include="ImGui\stb_textedit.h" />
     <ClInclude Include="ImGui\stb_truetype.h" />
     <ClInclude Include="Log.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="TestAppGame.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="VBO.h" />
+    <ClInclude Include="Vertex.h" />
     <ClInclude Include="Window_DX.h" />
   </ItemGroup>
   <ItemGroup>
@@ -169,11 +172,13 @@
     <ClCompile Include="ImGui\imgui_demo.cpp" />
     <ClCompile Include="ImGui\imgui_draw.cpp" />
     <ClCompile Include="ImGui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="TestApp.cpp" />
     <ClCompile Include="TestAppGame.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="VBO.cpp" />
     <ClCompile Include="Window_DX.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

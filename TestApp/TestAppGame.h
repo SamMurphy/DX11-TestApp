@@ -18,15 +18,10 @@
 #include <vector>
 
 #include "Texture.h"
+#include "Mesh.h"
 
 // Forward declarations
 class DirectXDevice;
-
-struct Vertex
-{
-	float x, y, z;
-	float u, v;
-};
 
 enum RT
 {
@@ -68,12 +63,7 @@ public:
 	void DestroyRenderTarget();
 
 private:
-	// Private Functions
-
-private:
-	// Data
-	Vertex Quad[6];
-
+	// Render Targets
 	RenderTarget* mpRenderTargets[RT::Count];
 
 	// DirectX Stuff
@@ -82,27 +72,30 @@ private:
 
 	ID3D11VertexShader* mpVertexShader;
 	ID3D11PixelShader* mpPixelShader;
-	ID3D11InputLayout* mpLayout;
-	ID3D11Buffer* mpVBO;
 
 	ID3D11VertexShader* mpVertexShaderPfx;
 	ID3D11PixelShader* mpPixelShaderPfx;
+	ID3D11InputLayout* mpLayout;
 
 	//D3D Objects To Create Into
 	ID3D11Texture2D* mpTexture2D = NULL;
 	ID3D11RenderTargetView*	mpRenderTargetView = NULL;
 	ID3D11ShaderResourceView* mpShaderResourceView = NULL;
 
+	// Meshes
+	Mesh* mpFullscreenQuad;
+
+	// Screen width and height
 	int width;
 	int height;
-
+	// Which monitor to display on
 	int monitor;
-
+	// Window state
 	bool mbFullscreen;
 	bool mbScreenStateChanged;
 	bool mbResolutionChanged;
 	bool mbBorderless;
-
+	// Do the post fx pass
 	bool mbPostFx;
 };
 

@@ -113,26 +113,15 @@ void TestAppGame::LoadAssets()
 	HRESULT result = mpDirectX->GetDevice()->CreateSamplerState(&samplerDesc, &mpSamplerState);
 
 	// GEOMERTRY
-	// Init the geometry - full screen quad
-	Quad[0] = { 1.0f, -1.0f, 0.0f, 1.0f, 1.0f };
-	Quad[1] = { -1.0f, -1.0f, 0.0f, 0.0f, 1.0f };
-	Quad[2] = { -1.0f,  1.0f, 0.0f, 0.0f, 0.0f };
-	Quad[3] = { 1.0f,  1.0f, 0.0f, 1.0f, 0.0f };
-	Quad[4] = { 1.0f, -1.0f, 0.0f, 1.0f, 1.0f };
-	Quad[5] = { -1.0f,  1.0f, 0.0f, 0.0f, 0.0f };
+	mpFullscreenQuad = new Mesh();
+	mpFullscreenQuad->AddVertex(Vertex(1.0f, -1.0f, 0.0f, 1.0f, 1.0f));
+	mpFullscreenQuad->AddVertex(Vertex(-1.0f, -1.0f, 0.0f, 0.0f, 1.0f));
+	mpFullscreenQuad->AddVertex(Vertex(-1.0f, 1.0f, 0.0f, 0.0f, 0.0f));
+	mpFullscreenQuad->AddVertex(Vertex(1.0f, 1.0f, 0.0f, 1.0f, 0.0f));
+	mpFullscreenQuad->AddVertex(Vertex(1.0f, -1.0f, 0.0f, 1.0f, 1.0f));
+	mpFullscreenQuad->AddVertex(Vertex(-1.0f, 1.0f, 0.0f, 0.0f, 0.0f));
 
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DYNAMIC;
-	bd.ByteWidth = sizeof(Vertex) * 6;
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	D3D11_SUBRESOURCE_DATA vertexData;
-	vertexData.pSysMem = &Quad;
-	vertexData.SysMemPitch = 0;
-	vertexData.SysMemSlicePitch = 0;
-	result = mpDirectX->GetDevice()->CreateBuffer(&bd, &vertexData, &mpVBO);
-	_ASSERT(result == S_OK);
+	mpFullscreenQuad->CreateVBO(mpDirectX);
 	// END OF GEOMETRY
 	
 	// SHADERS
@@ -152,15 +141,17 @@ void TestAppGame::LoadAssets()
 	mpDirectX->GetContext()->PSSetShader(mpPixelShader, 0, 0);
 
 	// create the input layout object
+	int liNumberOfElements = 3;
 	D3D11_INPUT_ELEMENT_DESC ied[] =
 	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	result = mpDirectX->GetDevice()->CreateInputLayout(ied, 2, VertexShader, sizeof(VertexShader), &mpLayout);
+	
+	result = mpDirectX->GetDevice()->CreateInputLayout(ied, liNumberOfElements, VertexShader, sizeof(VertexShader), &mpLayout);
 	_ASSERT(result == S_OK);
 	mpDirectX->GetContext()->IASetInputLayout(mpLayout);
-
 
 
 	mbFullscreen = false;
@@ -181,6 +172,9 @@ void TestAppGame::LoadAssets()
 */
 void TestAppGame::Shutdown()
 {
+	mpFullscreenQuad->Release();
+	delete mpFullscreenQuad;
+
 	// Clean up Rendertargets
 	for (int i = 0; i < RT::Count; i++)
 	{
@@ -336,13 +330,7 @@ void TestAppGame::Render(float deltaTime)
 	mpDirectX->GetContext()->PSSetSamplers(0, 1, &mpSamplerState);
 	mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpGradientTexture->GetAddressOfShaderResourceView());
 
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	mpDirectX->GetContext()->IASetVertexBuffers(0, 1, &mpVBO, &stride, &offset);
-	// select primitive type
-	mpDirectX->GetContext()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	// draw the vertex buffer to the back buffer
-	mpDirectX->GetContext()->Draw(6, 0);
+	mpFullscreenQuad->GetVBO()->Draw(mpDirectX);
 
 	// Second Pass
 	if (mbPostFx)
@@ -355,11 +343,7 @@ void TestAppGame::Render(float deltaTime)
 		mpDirectX->GetContext()->PSSetSamplers(0, 1, &mpSamplerState);
 		mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpRenderTargets[ColourBuffer]->GetAddressOfShaderResourceView());
 
-		mpDirectX->GetContext()->IASetVertexBuffers(0, 1, &mpVBO, &stride, &offset);
-		// select primitive type
-		mpDirectX->GetContext()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		// draw the vertex buffer to the back buffer
-		mpDirectX->GetContext()->Draw(6, 0);
+		mpFullscreenQuad->GetVBO()->Draw(mpDirectX);
 	}
 
 	// Final Pass
@@ -375,11 +359,7 @@ void TestAppGame::Render(float deltaTime)
 	else
 		mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpRenderTargets[ColourBuffer]->GetAddressOfShaderResourceView());
 
-	mpDirectX->GetContext()->IASetVertexBuffers(0, 1, &mpVBO, &stride, &offset);
-	// select primitive type
-	mpDirectX->GetContext()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	// draw the vertex buffer to the back buffer
-	mpDirectX->GetContext()->Draw(6, 0);
+	mpFullscreenQuad->GetVBO()->Draw(mpDirectX);
 
 	// Present
 	mpDirectX->SwapBuffers();

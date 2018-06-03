@@ -11,6 +11,7 @@ float3 CalcLuma(float3 colour)
 struct VOut
 {
 	float4 position : SV_POSITION;
+	float4 normal : NORMAL;
 	float2 texcoord : TEXCOORD;
 };
 
