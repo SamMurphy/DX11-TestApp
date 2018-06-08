@@ -54,7 +54,7 @@ public:
 
 	virtual void Render(float deltaTime);
 
-	float Random() { return ((double)rand() / (RAND_MAX)); }
+	float Random() { return ((float)rand() / (RAND_MAX)); }
 
 	void SetFullscreen(const bool lbFullscreen) { mbFullscreen = lbFullscreen; mbScreenStateChanged = true; }
 	const bool GetFullscreen() const { return mbFullscreen; }

@@ -21,7 +21,6 @@
 
 #pragma comment(lib, "dxgi.lib")
 
-#define FULL_SCREEN false
 #define SHOW_CURSOR true
 
 static const float clearColour[4] = { 227.0f / 255.0f, 0, 140.0f / 255.0f, 1.0f }; // Pinkish
@@ -61,7 +60,7 @@ void DirectXDevice::Initialise(int width, int height)
 	scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;     // how swap chain is to be used
 	scd.OutputWindow = _hWnd;                              // the window to be used
 	scd.SampleDesc.Count = 1;                              // how many multisamples
-	scd.Windowed = !FULL_SCREEN;                           // windowed/full-screen mode
+	scd.Windowed = true;                           // windowed/full-screen mode
 	scd.Flags = 0;
 	//scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;    // allow full-screen switching
 	scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
@@ -101,7 +100,7 @@ void DirectXDevice::Initialise(int width, int height)
 	hr = lpFactory->MakeWindowAssociation(scd.OutputWindow, DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_WINDOW_CHANGES);
 	_ASSERT(hr == S_OK);
 
-	ConfigureBackBuffer(width, height);
+	ConfigureBackBuffer((float)width, (float)height);
 
 	// Setup rasterizer state
 	D3D11_RASTERIZER_DESC raster;
@@ -306,8 +305,8 @@ void DirectXDevice::ConfigureBackBuffer(float width, float height)
 	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
 
 	// Set up the description of the depth buffer.
-	depthBufferDesc.Width = width;
-	depthBufferDesc.Height = height;
+	depthBufferDesc.Width = static_cast<UINT>(width);
+	depthBufferDesc.Height = static_cast<UINT>(height);
 	depthBufferDesc.MipLevels = 1;
 	depthBufferDesc.ArraySize = 1;
 	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -504,7 +503,7 @@ void DirectXDevice::SetWindowMode(bool fullscreen, bool borderless, int monitor)
 				DXGI_FORMAT_UNKNOWN,						// Format of the back buffer, UNKNOWN preserves the existing format
 				0 /*DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH*/ );	// Swap Chain flags
 			_ASSERT( result == S_OK );
-			ConfigureBackBuffer( SCREEN_WIDTH, SCREEN_HEIGHT );
+			ConfigureBackBuffer( (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT );
 			ImGui_ImplDX11_CreateDeviceObjects();
 		}
 	}
@@ -545,7 +544,7 @@ void DirectXDevice::SetWindowMode(bool fullscreen, bool borderless, int monitor)
 		// Should be safe to call funcs on the IDXGISwapChain on the main thread as we know the Submit Thread is idle right now.
 		if (fullscreen == 1)
 		{
-			SetSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+			SetSize((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT);
 
 			hr = _swapchain->SetFullscreenState(fullscreen, lpOutput);
 			_ASSERT(hr == S_OK);
@@ -556,7 +555,7 @@ void DirectXDevice::SetWindowMode(bool fullscreen, bool borderless, int monitor)
 			hr = _swapchain->SetFullscreenState(fullscreen, NULL);
 			_ASSERT(hr == S_OK);
 
-			SetSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+			SetSize((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT);
 		}
 	}
 }
@@ -568,8 +567,8 @@ void DirectXDevice::SetSize(float width, float height)
 	DXGI_MODE_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
 	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	desc.Height = height;
-	desc.Width = width;
+	desc.Height = static_cast<UINT>(height);
+	desc.Width = static_cast<UINT>(width);
 	desc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	desc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 
@@ -580,8 +579,8 @@ void DirectXDevice::SetSize(float width, float height)
 	CleanUpBackBuffer();
 	HRESULT result = _swapchain->ResizeBuffers(
 		0,											// Buffer Count, 0 preserves the existing number of buffers in the swap chain
-		width,										// Width - 0 will make DXGI pick the client area
-		height,										// Height - 0 will make DXGI pick the client area
+		static_cast<UINT>(width),										// Width - 0 will make DXGI pick the client area
+		static_cast<UINT>(height),										// Height - 0 will make DXGI pick the client area
 		DXGI_FORMAT_UNKNOWN,						// Format of the back buffer, UNKNOWN preserves the existing format
 		0 /*DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH*/ );	// Swap Chain flags
 	_ASSERT( result == S_OK );

@@ -66,9 +66,9 @@ void Game::Run()
 	timer.UpdateTime();
 
 	// Do the update logic.
-	Update(timer.DeltaTime());
+	Update((float)timer.DeltaTime());
 	// Render the game.
-	Render(timer.DeltaTime());
+	Render((float)timer.DeltaTime());
 }
 
 /**

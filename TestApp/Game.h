@@ -45,7 +45,7 @@ private:
 
 // Getters & Setters
 public:
-	float GetTime() const	{ return timer.DeltaTime(); }
+	double GetTime() const	{ return timer.DeltaTime(); }
 	bool GetQuitFlag() const { return quitFlag; }
 	void SetQuitFlag(bool b) { quitFlag = b; }
 	Window_DX* GetWindow()	{ return gameWindow; }

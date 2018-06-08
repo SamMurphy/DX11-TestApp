@@ -27,7 +27,7 @@ Window_DX::Window_DX(Game* newGame, const int newWidth, const int newHeight, con
 {
 	LOG_INFO << "Initialising Window: " << newWidth << "x" << newHeight;
 	// Reset RNG
-	srand(time(NULL));
+	srand(static_cast<unsigned int>(time(NULL)));
 
 	TheWindow = this;
 
@@ -182,8 +182,8 @@ LRESULT CALLBACK Window_DX::WindowProc(const HWND hwnd, const UINT message, cons
 		if (!ImGui::GetIO().WantCaptureMouse)
 #endif
 		{
-			float x = GET_X_LPARAM(lParam);
-			float y = GET_Y_LPARAM(lParam);
+			float x = (float)GET_X_LPARAM(lParam);
+			float y = (float)GET_Y_LPARAM(lParam);
 			TheWindow->GetGame()->OnMouseDown(x, y, 1, true);
 		}
 	}
@@ -194,8 +194,8 @@ LRESULT CALLBACK Window_DX::WindowProc(const HWND hwnd, const UINT message, cons
 		if (!ImGui::GetIO().WantCaptureMouse)
 #endif
 		{
-			float x = GET_X_LPARAM(lParam);
-			float y = GET_Y_LPARAM(lParam);
+			float x = (float)GET_X_LPARAM(lParam);
+			float y = (float)GET_Y_LPARAM(lParam);
 			TheWindow->GetGame()->OnMouseDown(x, y, 1, false);
 		}
 	}
@@ -206,8 +206,8 @@ LRESULT CALLBACK Window_DX::WindowProc(const HWND hwnd, const UINT message, cons
 		if (!ImGui::GetIO().WantCaptureMouse)
 #endif
 		{
-			float x = GET_X_LPARAM(lParam);
-			float y = GET_Y_LPARAM(lParam);
+			float x = (float)GET_X_LPARAM(lParam);
+			float y = (float)GET_Y_LPARAM(lParam);
 			TheWindow->GetGame()->OnMouseDown(x, y, 2, true);
 		}
 	}
@@ -218,8 +218,8 @@ LRESULT CALLBACK Window_DX::WindowProc(const HWND hwnd, const UINT message, cons
 		if (!ImGui::GetIO().WantCaptureMouse)
 #endif
 		{
-			float x = GET_X_LPARAM(lParam);
-			float y = GET_Y_LPARAM(lParam);
+			float x = (float)GET_X_LPARAM(lParam);
+			float y = (float)GET_Y_LPARAM(lParam);
 			TheWindow->GetGame()->OnMouseDown(x, y, 2, false);
 		}
 	}
@@ -230,8 +230,8 @@ LRESULT CALLBACK Window_DX::WindowProc(const HWND hwnd, const UINT message, cons
 		if (!ImGui::GetIO().WantCaptureMouse)
 #endif
 		{
-			float x = GET_X_LPARAM(lParam);
-			float y = GET_Y_LPARAM(lParam);
+			float x = (float)GET_X_LPARAM(lParam);
+			float y = (float)GET_Y_LPARAM(lParam);
 			TheWindow->GetGame()->OnMouseDown(x, y, 16, true);
 		}
 	}
@@ -242,8 +242,8 @@ LRESULT CALLBACK Window_DX::WindowProc(const HWND hwnd, const UINT message, cons
 		if (!ImGui::GetIO().WantCaptureMouse)
 #endif
 		{
-			float x = GET_X_LPARAM(lParam);
-			float y = GET_Y_LPARAM(lParam);
+			float x = (float)GET_X_LPARAM(lParam);
+			float y = (float)GET_Y_LPARAM(lParam);
 			TheWindow->GetGame()->OnMouseDown(x, y, 16, false);
 		}
 	}
@@ -254,8 +254,8 @@ LRESULT CALLBACK Window_DX::WindowProc(const HWND hwnd, const UINT message, cons
 		if (!ImGui::GetIO().WantCaptureMouse)
 #endif
 		{
-			float x = GET_X_LPARAM(lParam);
-			float y = GET_Y_LPARAM(lParam);
+			float x = (float)GET_X_LPARAM(lParam);
+			float y = (float)GET_Y_LPARAM(lParam);
 			TheWindow->GetGame()->OnMouseDown(x, y, wParam, true);
 		}
 	}
@@ -266,8 +266,8 @@ LRESULT CALLBACK Window_DX::WindowProc(const HWND hwnd, const UINT message, cons
 		if (!ImGui::GetIO().WantCaptureMouse)
 #endif
 		{
-			float x = GET_X_LPARAM(lParam);
-			float y = GET_Y_LPARAM(lParam);
+			float x = (float)GET_X_LPARAM(lParam);
+			float y = (float)GET_Y_LPARAM(lParam);
 			TheWindow->GetGame()->OnMouseDown(x, y, wParam, false);
 		}
 	}
@@ -278,8 +278,8 @@ LRESULT CALLBACK Window_DX::WindowProc(const HWND hwnd, const UINT message, cons
 		if (!ImGui::GetIO().WantCaptureMouse)
 #endif
 		{
-			float x = GET_X_LPARAM(lParam);
-			float y = GET_Y_LPARAM(lParam);
+			float x = (float)GET_X_LPARAM(lParam);
+			float y = (float)GET_Y_LPARAM(lParam);
 			TheWindow->GetGame()->OnMouseDown(x, y, wParam, true);
 		}
 	}
@@ -290,8 +290,8 @@ LRESULT CALLBACK Window_DX::WindowProc(const HWND hwnd, const UINT message, cons
 		if (!ImGui::GetIO().WantCaptureMouse)
 #endif
 		{
-			float x = GET_X_LPARAM(lParam);
-			float y = GET_Y_LPARAM(lParam);
+			float x = (float)GET_X_LPARAM(lParam);
+			float y = (float)GET_Y_LPARAM(lParam);
 			TheWindow->GetGame()->OnMouseMove(x, y);
 		}
 	}

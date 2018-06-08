@@ -26,7 +26,7 @@ public:
 
 	void UpdateTime();
 
-	float DeltaTime() const { return deltaTime; }
+	double DeltaTime() const { return deltaTime; }
 
 private:
 	/// The current time as a double.

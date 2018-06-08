@@ -96,7 +96,7 @@ bool Texture::CopyDataIntoTexture(DirectXDevice* device, BYTE * data, const int 
 		BYTE* mappedData = reinterpret_cast<BYTE*>(mappedResource.pData);
 
 		// Copy in the rows of data
-		for (UINT i = 0; i < miHeight; i++)
+		for (int i = 0; i < miHeight; i++)
 		{
 			memcpy(mappedData, pixels, rowPitch);
 			mappedData += mappedResource.RowPitch;

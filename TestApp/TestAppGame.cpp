@@ -392,7 +392,7 @@ void TestAppGame::Render(float deltaTime)
 			mpRenderTargets[i]->Release();
 		}
 
-		GetDevice()->SetSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+		GetDevice()->SetSize((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT);
 		mbResolutionChanged = false;
 
 		// Recreate up Rendertargets
