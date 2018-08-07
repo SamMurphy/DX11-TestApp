@@ -9,7 +9,7 @@ Camera::Camera() : _forward(0, 0, 1), _up(0, 1, 0), _fov(glm::radians(60.0f)), _
 	_orthographicMatrix = glm::ortho(0.0f, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT, 0.0f, 0.1f, 1.1f);
 	_view2dMatrix = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
 	// 3D
-	_projectionMatrix = glm::perspective(_fov, (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.01f, 10000.0f);
+	_projectionMatrix = glm::perspective(_fov, (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 10000.0f);
 	_viewMatrix = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
 
 	_moveSpeed = 1.0f;
