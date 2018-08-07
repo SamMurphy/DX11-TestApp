@@ -181,6 +181,29 @@ void DirectXDevice::Initialise(int width, int height)
 	blendFactor[3] = 0.0f;
 	_context->OMSetBlendState(_alphaBlendingState, blendFactor, 0xffffffff);
 
+
+	// Clear the blend state description.
+	D3D11_BLEND_DESC blendStateDescriptionAlphaDisabled;
+	ZeroMemory(&blendStateDescriptionAlphaDisabled, sizeof(D3D11_BLEND_DESC));
+
+	// Create an alpha enabled blend state description.
+	blendStateDescriptionAlphaDisabled.RenderTarget[0].BlendEnable = FALSE;
+	//blendStateDescription.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	blendStateDescriptionAlphaDisabled.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendStateDescriptionAlphaDisabled.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendStateDescriptionAlphaDisabled.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendStateDescriptionAlphaDisabled.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendStateDescriptionAlphaDisabled.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendStateDescriptionAlphaDisabled.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendStateDescriptionAlphaDisabled.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+
+	// Create the blend state using the description.
+	result = _device->CreateBlendState(&blendStateDescriptionAlphaDisabled, &_alphaBlendingDisabledState);
+	if (FAILED(result))
+	{
+		std::cout << "Failed to create blend state" << std::endl;
+	}
+
 	ShowCursor(SHOW_CURSOR);
 }
 
@@ -268,6 +291,19 @@ void DirectXDevice::EnableDepthBuffering(bool enable)
 		// turn off
 		_context->OMSetDepthStencilState(_depthDisabledStencilState, 1);
 	}
+}
+
+void DirectXDevice::EnableAlphaBlending(bool enable)
+{
+	float blendFactor[4];
+	blendFactor[0] = 0.0f;
+	blendFactor[1] = 0.0f;
+	blendFactor[2] = 0.0f;
+	blendFactor[3] = 0.0f;
+	if (enable)
+		_context->OMSetBlendState(_alphaBlendingState, blendFactor, 0xffffffff);
+	else
+		_context->OMSetBlendState(_alphaBlendingDisabledState, blendFactor, 0xffffffff);
 }
 
 /**

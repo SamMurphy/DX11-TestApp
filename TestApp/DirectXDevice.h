@@ -10,6 +10,7 @@
 */
 #pragma once
 #include <D3D11.h>
+#include <d3d11_1.h>
 
 // Forward declarations
 class Window_DX;
@@ -40,6 +41,7 @@ public:
 
 	virtual void EnableWireFrame(bool enable);
 	virtual void EnableDepthBuffering(bool enable);
+	virtual void EnableAlphaBlending(bool enable);
 
 	void DisplayCursor(bool showCursor);
 
@@ -80,6 +82,8 @@ protected:
 	ID3D11RasterizerState* _rasterStateWireFrame;
 	/// The pointer to the alpha blending state.
 	ID3D11BlendState* _alphaBlendingState;
+	/// The pointer to the alpha blending disabled state.
+	ID3D11BlendState* _alphaBlendingDisabledState;
 	/// Window handle
 	HWND _hWnd;
 };

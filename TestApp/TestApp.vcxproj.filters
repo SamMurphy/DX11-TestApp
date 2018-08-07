@@ -11,15 +11,12 @@
     <Filter Include="Source Files\Framework\ImGui">
       <UniqueIdentifier>{a1891ffc-a0f0-4155-b831-97d996413175}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Framework\DirectX">
+      <UniqueIdentifier>{4e4d4445-ce4e-476d-88f5-60d62ca8e7ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Timer.h">
-      <Filter>Source Files\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="Window_DX.h">
-      <Filter>Source Files\Framework</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXDevice.h">
       <Filter>Source Files\Framework</Filter>
     </ClInclude>
     <ClInclude Include="Game.h">
@@ -58,23 +55,44 @@
     <ClInclude Include="TestAppGame.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXDevice.h">
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClInclude>
     <ClInclude Include="RenderTarget.h">
-      <Filter>Source Files\Framework</Filter>
+      <Filter>Source Files\Framework\DirectX</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="VBO.h">
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Window_DX.h">
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureDetails.h">
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexBuffer.h">
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
       <Filter>Source Files\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="VBO.h" />
-    <ClInclude Include="Vertex.h" />
+    <ClInclude Include="Camera.h">
+      <Filter>Source Files\Framework</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Window_DX.cpp">
-      <Filter>Source Files\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXDevice.cpp">
-      <Filter>Source Files\Framework</Filter>
-    </ClCompile>
     <ClCompile Include="Game.cpp">
       <Filter>Source Files\Framework</Filter>
     </ClCompile>
@@ -99,17 +117,35 @@
     <ClCompile Include="TestAppGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RenderTarget.cpp">
-      <Filter>Source Files\Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Source Files\Framework</Filter>
+    <ClCompile Include="DirectXDevice.cpp">
+      <Filter>Source Files\Framework\DirectX</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTarget.cpp">
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\Framework\DirectX</Filter>
     </ClCompile>
     <ClCompile Include="VBO.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Window_DX.cpp">
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="IndexBuffer.cpp">
+      <Filter>Source Files\Framework\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Config.cpp">
+      <Filter>Source Files\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\Framework</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

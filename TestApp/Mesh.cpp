@@ -4,9 +4,31 @@
 
 Mesh::Mesh()
 	: mLocked(false),
-	mpVbo(NULL)
+	mpVbo(NULL),
+	mpIndexBuffer(NULL)
 
 {
+}
+
+Mesh::Mesh(std::vector<Vertex> vertices) :
+	Mesh()
+{
+	mVertices = vertices;
+}
+
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) :
+	Mesh()
+{
+	mVertices = vertices;
+	mIndices = indices;
+}
+
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indicies, std::vector<TextureDetail> textureDetails) :
+	Mesh()
+{
+	mVertices = vertices;
+	mIndices = indicies;
+	mTextureDetails = textureDetails;
 }
 
 
@@ -111,4 +133,60 @@ void Mesh::Release()
 	}
 	mLocked = false;
 	Clear();
+}
+
+void Mesh::SetupMesh(DirectXDevice* device)
+{
+	if (mpVbo)
+	{
+		mpVbo->Release();
+		delete mpVbo;
+		mpVbo = nullptr;
+	}
+	if (mpIndexBuffer)
+	{
+		mpIndexBuffer->Release();
+		delete mpIndexBuffer;
+		mpIndexBuffer = nullptr;
+	}
+	mLocked = false;
+	
+	if (mVertices.size() > 0)
+	{
+		mpVbo = new VBO();
+		mpVbo->Create(device, mVertices);
+	}
+
+	if (mIndices.size() > 0)
+	{
+		mpIndexBuffer = new IndexBuffer();
+		mpIndexBuffer->Create(device, mIndices);
+	}
+}
+
+void Mesh::Draw(DirectXDevice* device)
+{
+	if (!mpVbo) return;
+
+	mpVbo->SetVBO(device);
+
+
+	// select primitive type
+	device->GetContext()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	if (mTextureDetails.size() > 0 && mTextureDetails[0].mTexture)
+	{
+		device->GetContext()->PSSetShaderResources(0, 1, mTextureDetails[0].mTexture->GetAddressOfShaderResourceView());
+	}
+
+	if (mpIndexBuffer && mIndices.size() > 0)
+	{
+		mpIndexBuffer->SetIndexBuffer(device);
+		device->GetContext()->DrawIndexed(mIndices.size(), 0, 0);
+	}
+	else
+	{
+		// draw the vertex buffer to the back buffer
+		device->GetContext()->Draw(mVertices.size(), 0);
+	}
 }

@@ -19,6 +19,9 @@
 
 #include "Texture.h"
 #include "Mesh.h"
+#include "Model.h"
+
+#include "Camera.h"
 
 // Forward declarations
 class DirectXDevice;
@@ -30,6 +33,16 @@ enum RT
 
 	Count
 };
+
+struct PerFrameBuffer
+{
+	glm::mat4x4 VM;
+	glm::mat4x4 VM_Inv;
+	glm::mat4x4 PM;
+	glm::mat4x4 PM_Inv;
+	glm::vec4 CameraPosition;
+};
+
 
 /**
 * A game specific implementation of the parent class "Game.h", loads
@@ -59,15 +72,11 @@ public:
 	void SetFullscreen(const bool lbFullscreen) { mbFullscreen = lbFullscreen; mbScreenStateChanged = true; }
 	const bool GetFullscreen() const { return mbFullscreen; }
 
-	void CreateRenderTarget();
-	void DestroyRenderTarget();
-
 private:
 	// Render Targets
 	RenderTarget* mpRenderTargets[RT::Count];
 
 	// DirectX Stuff
-	Texture* mpGradientTexture;
 	ID3D11SamplerState* mpSamplerState;
 
 	ID3D11VertexShader* mpVertexShader;
@@ -77,13 +86,17 @@ private:
 	ID3D11PixelShader* mpPixelShaderPfx;
 	ID3D11InputLayout* mpLayout;
 
-	//D3D Objects To Create Into
-	ID3D11Texture2D* mpTexture2D = NULL;
-	ID3D11RenderTargetView*	mpRenderTargetView = NULL;
-	ID3D11ShaderResourceView* mpShaderResourceView = NULL;
-
 	// Meshes
 	Mesh* mpFullscreenQuad;
+
+	Model* mpModel;
+
+	// Camera
+	Camera* mpCamera;
+	glm::vec3 mCameraSpeed;
+	float mBoostMultiplier;
+	// The per frame buffer.
+	ID3D11Buffer* perFrameBuffer;
 
 	// Screen width and height
 	int width;

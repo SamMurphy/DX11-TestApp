@@ -3,6 +3,8 @@
 #include "Globals.h"
 #include <crtdbg.h>  
 
+static const float clearColourRT[4] = { 227.0f / 255.0f, 0, 140.0f / 255.0f, 1.0f }; // Pinkish
+
 RenderTarget::RenderTarget() : Texture(),  mpRenderTargetView(NULL)
 {
 	meUsage = D3D11_USAGE_DEFAULT;
@@ -54,4 +56,9 @@ void RenderTarget::SetDimensionsToFullscreen()
 {
 	miWidth = SCREEN_WIDTH;
 	miHeight = SCREEN_HEIGHT;
+}
+
+void RenderTarget::Clear(DirectXDevice * device)
+{
+	device->GetContext()->ClearRenderTargetView(mpRenderTargetView, clearColourRT);
 }

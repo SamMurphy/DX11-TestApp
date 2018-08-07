@@ -20,6 +20,9 @@ public:
 	void SetWidth(UINT width) { miWidth = width; }
 	void SetHeight(UINT height) { miHeight = height; }
 
+	void SetInitialData(const void* data, unsigned int pitch, unsigned int depth);
+
+	void ResetFlags() { miBindFlags = 0; miCPUAccessFlags = 0; }
 	void SetBindFlags(UINT flags) { miBindFlags |= flags; }
 	void SetCPUAccessFlags(UINT flags) { miCPUAccessFlags |= flags; }
 
@@ -34,6 +37,9 @@ protected:
 	UINT miBindFlags;
 	UINT miCPUAccessFlags;
 	D3D11_USAGE meUsage;
+
+	bool mInitialData;
+	D3D11_SUBRESOURCE_DATA mTexInitData;
 
 	ID3D11Texture2D* mpTexture;
 	ID3D11ShaderResourceView* mpTextureSRV;

@@ -7,9 +7,11 @@ Texture::Texture() :
 	miWidth(1024),
 	miHeight(1024),
 	mFormat(DXGI_FORMAT_R8G8B8A8_UNORM),
-	miBindFlags(0),
-	miCPUAccessFlags(0),
-	meUsage(D3D11_USAGE_DYNAMIC)
+	miBindFlags(D3D11_BIND_SHADER_RESOURCE),
+	miCPUAccessFlags(D3D11_CPU_ACCESS_WRITE),
+	meUsage(D3D11_USAGE_DYNAMIC),
+	mInitialData(false),
+	mTexInitData()
 {
 }
 
@@ -35,8 +37,17 @@ bool Texture::Initialise(DirectXDevice* device)
 	textureDesc.Usage = meUsage;
 
 	// Create Texture
-	HRESULT result = device->GetDevice()->CreateTexture2D(&textureDesc, NULL, &mpTexture);
+	HRESULT result;
+	if (mInitialData)
+	{
+		result = device->GetDevice()->CreateTexture2D(&textureDesc, &mTexInitData, &mpTexture);
+	}
+	else
+	{
+		result = device->GetDevice()->CreateTexture2D(&textureDesc, NULL, &mpTexture);
+	}
 	_ASSERT(result == S_OK);
+
 	// Create shader resource view
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
 	shaderResourceViewDesc.Format = mFormat;
@@ -73,6 +84,16 @@ bool Texture::Release()
 	}
 
 	return success;
+}
+
+void Texture::SetInitialData(const void* data, unsigned int pitch, unsigned int depth)
+{
+	mInitialData = true;
+	ZeroMemory(&mTexInitData, sizeof(D3D11_SUBRESOURCE_DATA));
+	mTexInitData.pSysMem = data;
+	mTexInitData.SysMemPitch = pitch;
+	mTexInitData.SysMemSlicePitch = depth;
+
 }
 
 /// Copies texture data from the passed in array "data" into the texture.

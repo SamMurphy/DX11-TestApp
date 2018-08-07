@@ -17,6 +17,8 @@ public:
 
 	void SetDimensionsToFullscreen();
 
+	void Clear(DirectXDevice* device);
+
 private:
 	ID3D11RenderTargetView*	mpRenderTargetView;
 };
