@@ -3,7 +3,7 @@
 #include "Globals.h"
 #include <crtdbg.h>  
 
-static const float clearColourRT[4] = { 227.0f / 255.0f, 0, 140.0f / 255.0f, 1.0f }; // Pinkish
+static const float clearColourRT[4] = { 0.0f, 0.0f, 0.0f, 1.0f }; // Black { 227.0f / 255.0f, 0, 140.0f / 255.0f, 1.0f }; // Pinkish
 
 RenderTarget::RenderTarget() : Texture(),  mpRenderTargetView(NULL)
 {

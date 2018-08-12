@@ -19,5 +19,11 @@
     <FxCompile Include="VertexShaderPfx.hlsl">
       <Filter>Source Files</Filter>
     </FxCompile>
+    <FxCompile Include="GBuffer_PixelShader.hlsl">
+      <Filter>Source Files</Filter>
+    </FxCompile>
+    <FxCompile Include="GBuffer_VertexShader.hlsl">
+      <Filter>Source Files</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

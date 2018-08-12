@@ -23,6 +23,9 @@
 #include "PixelShaderPfx.h"
 #include "VertexShaderPfx.h"
 
+#include "GBuffer_PixelShader.h"
+#include "GBuffer_VertexShader.h"
+
 #include "Camera.h"
 
 #include "ImGui\imgui.h"
@@ -59,8 +62,13 @@ void TestAppGame::Initialise(Window_DX * win)
 	{
 		mpRenderTargets[i] = new RenderTarget();
 		mpRenderTargets[i]->SetDimensionsToFullscreen();
+		mpRenderTargets[i]->SetFormat(DXGI_FORMAT_R16G16B16A16_FLOAT);
 		mpRenderTargets[i]->Initialise(mpDirectX);
 	}
+
+	mpGBuffer[0] = mpRenderTargets[RT::PositionBuffer]->GetRenderTargetView(); //First target
+	mpGBuffer[1] = mpRenderTargets[RT::NormalBuffer]->GetRenderTargetView(); //second target
+	mpGBuffer[2] = mpRenderTargets[RT::DiffuseBuffer]->GetRenderTargetView(); // third target
 
 	monitor = 1;
 	// Create Camera
@@ -116,6 +124,11 @@ void TestAppGame::LoadAssets()
 	result = mpDirectX->GetDevice()->CreateVertexShader(VertexShaderPfx, sizeof(VertexShaderPfx), NULL, &mpVertexShaderPfx);
 	_ASSERT(result == S_OK);
 	result = mpDirectX->GetDevice()->CreatePixelShader(PixelShaderPfx, sizeof(PixelShaderPfx), NULL, &mpPixelShaderPfx);
+	_ASSERT(result == S_OK);
+
+	result = mpDirectX->GetDevice()->CreateVertexShader(GBuffer_VertexShader, sizeof(GBuffer_VertexShader), NULL, &mpVertexShaderGBuffer);
+	_ASSERT(result == S_OK);
+	result = mpDirectX->GetDevice()->CreatePixelShader(GBuffer_PixelShader, sizeof(GBuffer_PixelShader), NULL, &mpPixelShaderGBuffer);
 	_ASSERT(result == S_OK);
 
 	// set the shader objects
@@ -189,6 +202,12 @@ void TestAppGame::Shutdown()
 
 	mpPixelShaderPfx->Release();
 	mpPixelShaderPfx = nullptr;
+
+	mpVertexShaderGBuffer->Release();
+	mpVertexShaderGBuffer = nullptr;
+
+	mpPixelShaderGBuffer->Release();
+	mpPixelShaderGBuffer = nullptr;
 
 	mpLayout->Release();
 	mpLayout = nullptr;
@@ -345,10 +364,11 @@ void TestAppGame::Render(float deltaTime)
 
 	// First Pass
 	// set the shader objects
-	mpDirectX->GetContext()->VSSetShader(mpVertexShader, 0, 0);
-	mpDirectX->GetContext()->PSSetShader(mpPixelShader, 0, 0);
+	mpDirectX->GetContext()->VSSetShader(mpVertexShaderGBuffer, 0, 0);
+	mpDirectX->GetContext()->PSSetShader(mpPixelShaderGBuffer, 0, 0);
 
-	mpDirectX->GetContext()->OMSetRenderTargets(1, mpRenderTargets[ColourBuffer]->GetAddressOfRenderTargetView(), mpDirectX->GetDepthStencilView());
+	//mpDirectX->GetContext()->OMSetRenderTargets(1, mpRenderTargets[ColourBuffer]->GetAddressOfRenderTargetView(), mpDirectX->GetDepthStencilView());
+	mpDirectX->GetContext()->OMSetRenderTargets(RT::DiffuseBuffer+1, mpGBuffer, mpDirectX->GetDepthStencilView());
 
 	mpDirectX->GetContext()->PSSetSamplers(0, 1, &mpSamplerState);
 
@@ -382,7 +402,7 @@ void TestAppGame::Render(float deltaTime)
 		mpDirectX->GetContext()->OMSetRenderTargets(1, mpRenderTargets[PostFx]->GetAddressOfRenderTargetView(), mpDirectX->GetDepthStencilView());
 
 		mpDirectX->GetContext()->PSSetSamplers(0, 1, &mpSamplerState);
-		mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpRenderTargets[ColourBuffer]->GetAddressOfShaderResourceView());
+		mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpRenderTargets[DiffuseBuffer]->GetAddressOfShaderResourceView());
 
 		//mpFullscreenQuad->GetVBO()->Draw(mpDirectX);
 		mpFullscreenQuad->Draw(mpDirectX);
@@ -399,7 +419,7 @@ void TestAppGame::Render(float deltaTime)
 	if (mbPostFx)
 		mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpRenderTargets[PostFx]->GetAddressOfShaderResourceView());
 	else
-		mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpRenderTargets[ColourBuffer]->GetAddressOfShaderResourceView());
+		mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpRenderTargets[DiffuseBuffer]->GetAddressOfShaderResourceView());
 
 	//mpFullscreenQuad->GetVBO()->Draw(mpDirectX);
 	mpFullscreenQuad->Draw(mpDirectX);

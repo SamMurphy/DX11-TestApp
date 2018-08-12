@@ -28,6 +28,9 @@ class DirectXDevice;
 
 enum RT
 {
+	PositionBuffer,
+	NormalBuffer,
+	DiffuseBuffer,
 	ColourBuffer,
 	PostFx,
 
@@ -75,6 +78,7 @@ public:
 private:
 	// Render Targets
 	RenderTarget* mpRenderTargets[RT::Count];
+	ID3D11RenderTargetView* mpGBuffer[RT::DiffuseBuffer+1];
 
 	// DirectX Stuff
 	ID3D11SamplerState* mpSamplerState;
@@ -84,6 +88,10 @@ private:
 
 	ID3D11VertexShader* mpVertexShaderPfx;
 	ID3D11PixelShader* mpPixelShaderPfx;
+
+	ID3D11VertexShader* mpVertexShaderGBuffer;
+	ID3D11PixelShader* mpPixelShaderGBuffer;
+
 	ID3D11InputLayout* mpLayout;
 
 	// Meshes
