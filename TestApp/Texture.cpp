@@ -8,6 +8,8 @@ Texture::Texture() :
 	miHeight(1024),
 	mFormat(DXGI_FORMAT_R8G8B8A8_UNORM),
 	miBindFlags(D3D11_BIND_SHADER_RESOURCE),
+	miMiscFlags(0),
+	miMipLevels(1),
 	miCPUAccessFlags(D3D11_CPU_ACCESS_WRITE),
 	meUsage(D3D11_USAGE_DYNAMIC),
 	mInitialData(false),
@@ -27,11 +29,14 @@ bool Texture::Initialise(DirectXDevice* device)
 	textureDesc.Width = miWidth;
 	textureDesc.Height = miHeight;
 	textureDesc.Format = mFormat;
-	textureDesc.MipLevels = 1;
+	if (miMipLevels > 1)
+		textureDesc.MipLevels = 0;
+	else
+		textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
 	textureDesc.BindFlags = miBindFlags;
 	textureDesc.CPUAccessFlags = miCPUAccessFlags;
-	textureDesc.MiscFlags = 0;
+	textureDesc.MiscFlags = miMiscFlags;
 	textureDesc.SampleDesc.Count = 1;
 	textureDesc.SampleDesc.Quality = 0;
 	textureDesc.Usage = meUsage;
@@ -40,7 +45,16 @@ bool Texture::Initialise(DirectXDevice* device)
 	HRESULT result;
 	if (mInitialData)
 	{
-		result = device->GetDevice()->CreateTexture2D(&textureDesc, &mTexInitData, &mpTexture);
+		if (miMipLevels > 1)
+		{
+			result = device->GetDevice()->CreateTexture2D(&textureDesc, NULL, &mpTexture);
+			// Copy the first mip into the texture the others will be generated.
+			device->GetContext()->UpdateSubresource(mpTexture, 0, NULL, mTexInitData.pSysMem, mTexInitData.SysMemPitch, 0);
+		}
+		else
+		{
+			result = device->GetDevice()->CreateTexture2D(&textureDesc, &mTexInitData, &mpTexture);
+		}
 	}
 	else
 	{
@@ -52,9 +66,8 @@ bool Texture::Initialise(DirectXDevice* device)
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
 	shaderResourceViewDesc.Format = mFormat;
 	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
-	shaderResourceViewDesc.Texture2D.MipLevels = 1;
-	result = device->GetDevice()->CreateShaderResourceView(mpTexture, &shaderResourceViewDesc, &mpTextureSRV);
+	//result = device->GetDevice()->CreateShaderResourceView(mpTexture, &shaderResourceViewDesc, &mpTextureSRV);
+	result = device->GetDevice()->CreateShaderResourceView(mpTexture, NULL, &mpTextureSRV);
 	_ASSERT(result == S_OK);
 
 	return (result == S_OK);

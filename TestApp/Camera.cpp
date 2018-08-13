@@ -13,7 +13,7 @@ Camera::Camera() : _forward(0, 0, 1), _up(0, 1, 0), _fov(glm::radians(60.0f)), _
 	_viewMatrix = glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
 
 	_moveSpeed = 1.0f;
-	_rotationSpeed = 0.002f;
+	_rotationSpeed = 0.004f;
 }
 
 

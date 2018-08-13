@@ -4,9 +4,12 @@
 #include <stb/stb_image.h>
 #include "Texture.h"
 
+
+
 Model::Model(DirectXDevice* device, const std::string path)
 {
 	mpDevice = device;
+	mbGenerateMipMaps = true;
 	LoadModel(path);
 }
 
@@ -135,26 +138,52 @@ std::vector<TextureDetail> Model::LoadMaterialTextures(aiMaterial * mat, aiTextu
 
 Texture* Model::TextureFromFile(const std::string path, const std::string directory)
 {
+	// Generate mip maps on textures with width and heights above or equal to this value
+	static const int MIP_MAPS_ABOVE = 512;
+
+	// Get the full file name
 	std::string filename = std::string(path);
 	filename = directory + '/' + filename;
 
 	Texture* texture = new Texture();
 
+	// Get the data from stbi
 	int width, height, nrComponents;
 	unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 4);
+
+	// Create the texture
 	if (data)
 	{
+		// If the size is above the constant then set all the properties needed to generate mip maps
+		if (mbGenerateMipMaps)
+		{
+			if (width >= MIP_MAPS_ABOVE && height >= MIP_MAPS_ABOVE)
+			{
+				texture->SetBindFlags(D3D11_BIND_RENDER_TARGET);
+				texture->SetMiscFlags(D3D11_RESOURCE_MISC_GENERATE_MIPS);
+				int numLevels = 1 + floor(log2(max(width, height)));
+				texture->SetMipLevels(numLevels);
+				texture->SetUsage(D3D11_USAGE_DEFAULT);
+			}
+		}
+
+		// Create and init the texture
 		texture->SetDimensions(width, height);
 		texture->SetFormat(DXGI_FORMAT_R8G8B8A8_UNORM);
 		texture->SetInitialData(data, width * 4, 0);
 		texture->Initialise(mpDevice);
+
+		// Actually generate the mip maps
+		if (mbGenerateMipMaps)
+			if (width >= MIP_MAPS_ABOVE && height >= MIP_MAPS_ABOVE)
+				mpDevice->GetContext()->GenerateMips(texture->GetShaderResourceView());
 	}
 	else
 	{
 		LOG_ERROR << "Texture failed to load at path: " << path;
 	}
 
+	// Free the image data
 	stbi_image_free(data);
-	
 	return texture;
 }

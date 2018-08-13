@@ -174,9 +174,21 @@ void Mesh::Draw(DirectXDevice* device)
 	// select primitive type
 	device->GetContext()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	// Diffuse
 	if (mTextureDetails.size() > 0 && mTextureDetails[0].mTexture)
 	{
 		device->GetContext()->PSSetShaderResources(0, 1, mTextureDetails[0].mTexture->GetAddressOfShaderResourceView());
+	}
+
+	// Specular
+	if (mTextureDetails.size() > 1 && mTextureDetails[1].mTexture)
+	{
+		device->GetContext()->PSSetShaderResources(1, 1, mTextureDetails[1].mTexture->GetAddressOfShaderResourceView());
+	}
+	else
+	{
+		ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+		device->GetContext()->PSSetShaderResources(1, 1, nullSRV);
 	}
 
 	if (mpIndexBuffer && mIndices.size() > 0)

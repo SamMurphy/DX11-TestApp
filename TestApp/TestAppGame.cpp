@@ -69,6 +69,7 @@ void TestAppGame::Initialise(Window_DX * win)
 	mpGBuffer[0] = mpRenderTargets[RT::PositionBuffer]->GetRenderTargetView(); //First target
 	mpGBuffer[1] = mpRenderTargets[RT::NormalBuffer]->GetRenderTargetView(); //second target
 	mpGBuffer[2] = mpRenderTargets[RT::DiffuseBuffer]->GetRenderTargetView(); // third target
+	mpGBuffer[3] = mpRenderTargets[RT::SpecularBuffer]->GetRenderTargetView(); // fourth target
 
 	monitor = 1;
 	// Create Camera
@@ -90,12 +91,12 @@ void TestAppGame::LoadAssets()
 
 	// Create a sampler
 	D3D11_SAMPLER_DESC samplerDesc;
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;// D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.MipLODBias = 0.0f;
-	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.MaxAnisotropy = 16;
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	samplerDesc.MinLOD = -FLT_MAX;
 	samplerDesc.MaxLOD = FLT_MAX;

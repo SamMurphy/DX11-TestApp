@@ -30,6 +30,7 @@ enum RT
 {
 	PositionBuffer,
 	NormalBuffer,
+	SpecularBuffer,
 	DiffuseBuffer,
 	ColourBuffer,
 	PostFx,

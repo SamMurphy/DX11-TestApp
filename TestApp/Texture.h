@@ -24,9 +24,13 @@ public:
 
 	void ResetFlags() { miBindFlags = 0; miCPUAccessFlags = 0; }
 	void SetBindFlags(UINT flags) { miBindFlags |= flags; }
+	void SetMiscFlags(UINT flags) { miMiscFlags |= flags; }
 	void SetCPUAccessFlags(UINT flags) { miCPUAccessFlags |= flags; }
+	void SetUsage(D3D11_USAGE usage) { meUsage = usage; }
 
 	void SetFormat(DXGI_FORMAT format) { mFormat = format; }
+
+	void SetMipLevels(UINT levels) { miMipLevels = levels; }
 
 	bool CopyDataIntoTexture(DirectXDevice* device, BYTE* data, const int rowPitch);
 
@@ -36,7 +40,9 @@ protected:
 	DXGI_FORMAT mFormat;
 	UINT miBindFlags;
 	UINT miCPUAccessFlags;
+	UINT miMiscFlags;
 	D3D11_USAGE meUsage;
+	int miMipLevels;
 
 	bool mInitialData;
 	D3D11_SUBRESOURCE_DATA mTexInitData;

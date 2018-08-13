@@ -30,5 +30,6 @@ public:
 	std::vector<TextureDetail> mTexturesLoaded;
 
 	DirectXDevice* mpDevice;
+	bool mbGenerateMipMaps;
 };
 
