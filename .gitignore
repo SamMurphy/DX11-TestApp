@@ -330,4 +330,4 @@ ASALocalRun/
 .mfractor/
 
 # Include everything in the following folders
-!Resources/
+!Resources/*.obj
