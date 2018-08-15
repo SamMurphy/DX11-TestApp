@@ -47,7 +47,6 @@ TestAppGame::~TestAppGame()
 
 void TestAppGame::Initialise(Window_DX * win)
 {
-	mCameraSpeed = glm::vec3(1, 1, 1);
 	mBoostMultiplier = 1.0f;
 	// Init DirectX.
 	LOG_INFO << "Initialise the direct X device";
@@ -66,10 +65,14 @@ void TestAppGame::Initialise(Window_DX * win)
 		mpRenderTargets[i]->Initialise(mpDirectX);
 	}
 
-	mpGBuffer[0] = mpRenderTargets[RT::PositionBuffer]->GetRenderTargetView(); //First target
-	mpGBuffer[1] = mpRenderTargets[RT::NormalBuffer]->GetRenderTargetView(); //second target
-	mpGBuffer[2] = mpRenderTargets[RT::DiffuseBuffer]->GetRenderTargetView(); // third target
-	mpGBuffer[3] = mpRenderTargets[RT::SpecularBuffer]->GetRenderTargetView(); // fourth target
+
+	for (int i = 0; i < GBUFFER_SIZE; i++)
+	{
+		mpGBuffer[i] = mpRenderTargets[RT::GBufferStart + i]->GetRenderTargetView();
+	}
+	//mpGBuffer[0] = mpRenderTargets[RT::PositionBuffer]->GetRenderTargetView(); //First target
+	//mpGBuffer[1] = mpRenderTargets[RT::NormalBuffer]->GetRenderTargetView(); //second target
+	//mpGBuffer[2] = mpRenderTargets[RT::DiffuseBuffer]->GetRenderTargetView(); // third target
 
 	monitor = 1;
 	// Create Camera
@@ -341,7 +344,6 @@ void TestAppGame::Update(float deltaTime)
 		mbPostFx = !mbPostFx;
 	}
 
-	ImGui::InputFloat3("Camera Speed", &mCameraSpeed[0]);
 	ImGui::InputFloat("Boost", &mBoostMultiplier);
 #endif
 }
@@ -361,7 +363,7 @@ void TestAppGame::Render(float deltaTime)
 	}
 
 	mpDirectX->EnableDepthBuffering(true);
-	mpDirectX->EnableAlphaBlending(true);
+	mpDirectX->EnableAlphaBlending(false);
 
 	// First Pass
 	// set the shader objects
@@ -369,7 +371,7 @@ void TestAppGame::Render(float deltaTime)
 	mpDirectX->GetContext()->PSSetShader(mpPixelShaderGBuffer, 0, 0);
 
 	//mpDirectX->GetContext()->OMSetRenderTargets(1, mpRenderTargets[ColourBuffer]->GetAddressOfRenderTargetView(), mpDirectX->GetDepthStencilView());
-	mpDirectX->GetContext()->OMSetRenderTargets(RT::DiffuseBuffer+1, mpGBuffer, mpDirectX->GetDepthStencilView());
+	mpDirectX->GetContext()->OMSetRenderTargets(GBUFFER_SIZE, mpGBuffer, mpDirectX->GetDepthStencilView());
 
 	mpDirectX->GetContext()->PSSetSamplers(0, 1, &mpSamplerState);
 
@@ -427,6 +429,9 @@ void TestAppGame::Render(float deltaTime)
 
 	// Present
 	mpDirectX->SwapBuffers();
+
+
+	// -- HANDLE CHANGE OF SCREEN STATE OR RESOLUTION --
 
 	if (mbScreenStateChanged)
 	{

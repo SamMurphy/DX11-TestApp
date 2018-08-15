@@ -30,13 +30,17 @@ enum RT
 {
 	PositionBuffer,
 	NormalBuffer,
-	SpecularBuffer,
 	DiffuseBuffer,
 	ColourBuffer,
 	PostFx,
 
-	Count
+	Count,
+
+	GBufferStart = PositionBuffer,
+	GBufferEnd = DiffuseBuffer,
 };
+
+static const int GBUFFER_SIZE = RT::GBufferEnd - RT::GBufferStart + 1;
 
 struct PerFrameBuffer
 {
@@ -79,7 +83,7 @@ public:
 private:
 	// Render Targets
 	RenderTarget* mpRenderTargets[RT::Count];
-	ID3D11RenderTargetView* mpGBuffer[RT::DiffuseBuffer+1];
+	ID3D11RenderTargetView* mpGBuffer[GBUFFER_SIZE];
 
 	// DirectX Stuff
 	ID3D11SamplerState* mpSamplerState;
@@ -102,7 +106,6 @@ private:
 
 	// Camera
 	Camera* mpCamera;
-	glm::vec3 mCameraSpeed;
 	float mBoostMultiplier;
 	// The per frame buffer.
 	ID3D11Buffer* perFrameBuffer;

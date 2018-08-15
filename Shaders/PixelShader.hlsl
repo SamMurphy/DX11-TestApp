@@ -13,6 +13,5 @@ struct VOut
 float4 main(VOut IN) : SV_TARGET
 {
 	float4 textureColour = shaderTexture.Sample(SampleType, IN.texcoord);
-	clip(textureColour.a - 0.4999f);
 	return textureColour;
 }

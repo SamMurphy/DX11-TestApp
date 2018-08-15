@@ -14,10 +14,9 @@ struct VOut
 
 struct PSOut
 {
-	float4 Position : SV_Target0;
-	float4 Normal   : SV_Target1;
-	float4 Diffuse  : SV_Target2;
-	float4 Specular : SV_Target3;
+	float4 Position			: SV_Target0;
+	float4 Normal			: SV_Target1;
+	float4 DiffuseSpecular  : SV_Target2;
 };
 
 
@@ -28,15 +27,14 @@ PSOut main(VOut IN) : SV_TARGET
 	float4 textureColour = diffuseTexture.Sample(SampleType, IN.texcoord);
 	clip(textureColour.a - 0.4999f);
 
-	float4 specularColour = specularTexture.Sample(SampleType, IN.texcoord);
+	float specularColour = specularTexture.Sample(SampleType, IN.texcoord).x;
 
 
 	output.Position = IN.worldPos;
 	output.Normal = IN.normal;
 	output.Normal.a = 1.0f;
-	output.Diffuse = textureColour;
-	output.Specular = specularColour;
-	output.Specular.a = 1.0f;
+	output.DiffuseSpecular = textureColour;
+	output.DiffuseSpecular.a = specularColour;
 
 	return output;
 }
