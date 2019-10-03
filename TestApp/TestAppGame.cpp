@@ -70,9 +70,6 @@ void TestAppGame::Initialise(Window_DX * win)
 	{
 		mpGBuffer[i] = mpRenderTargets[RT::GBufferStart + i]->GetRenderTargetView();
 	}
-	//mpGBuffer[0] = mpRenderTargets[RT::PositionBuffer]->GetRenderTargetView(); //First target
-	//mpGBuffer[1] = mpRenderTargets[RT::NormalBuffer]->GetRenderTargetView(); //second target
-	//mpGBuffer[2] = mpRenderTargets[RT::DiffuseBuffer]->GetRenderTargetView(); // third target
 
 	monitor = 1;
 	// Create Camera
@@ -354,7 +351,7 @@ void TestAppGame::Update(float deltaTime)
 */
 void TestAppGame::Render(float deltaTime)
 {
-	
+
 	// Clear the screen
 	mpDirectX->ClearScreen();
 	for (int i = 0; i < RT::Count; i++)
@@ -394,6 +391,13 @@ void TestAppGame::Render(float deltaTime)
 	// Draw the model
 	mpModel->Draw(mpDirectX);
 
+	ID3D11RenderTargetView* clearGBuffer[GBUFFER_SIZE];
+	for (int i = 0; i < GBUFFER_SIZE; i++)
+	{
+		clearGBuffer[i] = NULL;
+	}
+	mpDirectX->GetContext()->OMSetRenderTargets(GBUFFER_SIZE, clearGBuffer, NULL);
+
 	mpDirectX->EnableDepthBuffering(false);
 	mpDirectX->EnableAlphaBlending(false);
 	// Post FX pass
@@ -402,13 +406,23 @@ void TestAppGame::Render(float deltaTime)
 		// set the shader objects
 		mpDirectX->GetContext()->VSSetShader(mpVertexShaderPfx, 0, 0);
 		mpDirectX->GetContext()->PSSetShader(mpPixelShaderPfx, 0, 0);
-		mpDirectX->GetContext()->OMSetRenderTargets(1, mpRenderTargets[PostFx]->GetAddressOfRenderTargetView(), mpDirectX->GetDepthStencilView());
+		mpDirectX->GetContext()->OMSetRenderTargets(1, mpRenderTargets[PostFx]->GetAddressOfRenderTargetView(), NULL);
 
 		mpDirectX->GetContext()->PSSetSamplers(0, 1, &mpSamplerState);
 		mpDirectX->GetContext()->PSSetShaderResources(0, 1, mpRenderTargets[DiffuseBuffer]->GetAddressOfShaderResourceView());
+		mpDirectX->GetContext()->PSSetShaderResources(1, 1, mpRenderTargets[PositionBuffer]->GetAddressOfShaderResourceView());
+		mpDirectX->GetContext()->PSSetShaderResources(2, 1, mpRenderTargets[NormalBuffer]->GetAddressOfShaderResourceView());
+		mpDirectX->GetContext()->PSSetShaderResources(3, 1, mpDirectX->GetAddressOfDepthStencilSRV());
 
-		//mpFullscreenQuad->GetVBO()->Draw(mpDirectX);
+		mpDirectX->GetContext()->PSSetConstantBuffers(1, 1, &perFrameBuffer);
+
 		mpFullscreenQuad->Draw(mpDirectX);
+
+		ID3D11ShaderResourceView *const pSRV[1] = { NULL };
+		mpDirectX->GetContext()->PSSetShaderResources(0, 1, pSRV);
+		mpDirectX->GetContext()->PSSetShaderResources(1, 1, pSRV);
+		mpDirectX->GetContext()->PSSetShaderResources(2, 1, pSRV);
+		mpDirectX->GetContext()->PSSetShaderResources(3, 1, pSRV);
 	}
 
 	// Final Pass - Copy pfx or colour buffer to the back buffer

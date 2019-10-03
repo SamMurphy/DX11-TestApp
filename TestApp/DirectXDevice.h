@@ -54,6 +54,7 @@ public:
 	int GetNumberOfMonitors();
 
 	ID3D11DepthStencilView* GetDepthStencilView() { return _depthStencilView; }
+	ID3D11ShaderResourceView** GetAddressOfDepthStencilSRV() { return &_depthStencilBufferSRV; }
 	ID3D11RenderTargetView* GetBackBuffer() { return _backbuffer; }
 	ID3D11RenderTargetView** GetAddressOfBackBuffer() { return &_backbuffer; }
 
@@ -70,6 +71,8 @@ protected:
 	ID3D11RenderTargetView* _backbuffer;
 	/// The pointer to the depth stencil buffer.
 	ID3D11Texture2D* _depthStencilBuffer;
+	/// The pointer tho the depth stencil buffers shader resource view.
+	ID3D11ShaderResourceView* _depthStencilBufferSRV;
 	/// The pointer to the depth stencil state.
 	ID3D11DepthStencilState* _depthStencilState;
 	/// The pointer to the depth stencil state, where depth buffering is disabled.

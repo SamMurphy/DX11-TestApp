@@ -1,12 +1,22 @@
 
-// Texture
-Texture2D shaderTexture;
-SamplerState SampleType;
+#include "SSR.hlsli"
 
-float3 CalcLuma(float3 colour)
+// Texture
+Texture2D diffuseTexture : register(t0);
+Texture2D positionTexture : register(t1);
+Texture2D normalTexture : register(t2);
+Texture2D depthTexture : register(t3);
+
+SamplerState SampleType : register(s0);
+
+cbuffer PerFrameBuffer: register(b1)
 {
-	return max(dot(colour, float3(0.299f, 0.587f, 0.114f)), 0.0001f);
-}
+	float4x4 VM;
+	float4x4 VM_Inv;
+	float4x4 PM;
+	float4x4 PM_Inv;
+	float4 CameraPosition;
+};
 
 struct VOut
 {
@@ -17,9 +27,16 @@ struct VOut
 
 float4 main(VOut IN) : SV_TARGET
 {
-	float4 textureColour = shaderTexture.Sample(SampleType, IN.texcoord);
+	float4 textureColour = diffuseTexture.Sample(SampleType, IN.texcoord);
+	float4 world_position = positionTexture.Sample(SampleType, IN.texcoord); // world space
+	float4 normal = normalTexture.Sample(SampleType, IN.texcoord); // world space
+	float depth = depthTexture.Sample(SampleType, IN.texcoord).r;
 
-	textureColour.rgb = CalcLuma(textureColour.rgb);
+	float4 view_ray = normal - CameraPosition;
+	float4 view_dir = normalize(view_ray);
 
-	return textureColour;
+
+
+	float4 output = view_dir;
+	return output;
 }

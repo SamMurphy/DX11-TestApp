@@ -337,6 +337,7 @@ void DirectXDevice::ConfigureBackBuffer(float width, float height)
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	D3D11_DEPTH_STENCIL_DESC depthDisableStencilDesc;
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	D3D11_SHADER_RESOURCE_VIEW_DESC depthShaderResourceViewDesc;
 
 	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
 
@@ -345,11 +346,11 @@ void DirectXDevice::ConfigureBackBuffer(float width, float height)
 	depthBufferDesc.Height = static_cast<UINT>(height);
 	depthBufferDesc.MipLevels = 1;
 	depthBufferDesc.ArraySize = 1;
-	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthBufferDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 	depthBufferDesc.SampleDesc.Count = 1;
 	depthBufferDesc.SampleDesc.Quality = 0;
 	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	depthBufferDesc.CPUAccessFlags = 0;
 	depthBufferDesc.MiscFlags = 0;
 
@@ -384,7 +385,7 @@ void DirectXDevice::ConfigureBackBuffer(float width, float height)
 	result = _device->CreateDepthStencilState(&depthStencilDesc, &_depthStencilState);
 	if (FAILED(result))
 	{
-		std::cout << "Failed to create depth stenicl state" << std::endl;
+		std::cout << "Failed to create depth stencil state" << std::endl;
 	}
 	_context->OMSetDepthStencilState(_depthStencilState, 1);
 
@@ -412,22 +413,39 @@ void DirectXDevice::ConfigureBackBuffer(float width, float height)
 	result = _device->CreateDepthStencilState(&depthDisableStencilDesc, &_depthDisabledStencilState);
 	if (FAILED(result))
 	{
-		std::cout << "Failed to create depth disabled stenicl state" << std::endl;
+		std::cout << "Failed to create depth disabled stencil state" << std::endl;
 	}
 
 	// Initialize the depth stencil view.
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
 
 	// Set up the depth stencil view description.
-	depthStencilViewDesc.Format = depthBufferDesc.Format;
+	depthStencilViewDesc.Flags = 0;
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 
-	result = _device->CreateDepthStencilView(_depthStencilBuffer, NULL, &_depthStencilView);
+	result = _device->CreateDepthStencilView(_depthStencilBuffer, &depthStencilViewDesc, &_depthStencilView);
 	if (FAILED(result))
 	{
 		std::cout << "Failed to create depth stencil view" << std::endl;
 	}
+
+	// Create depth shader resource view
+	ZeroMemory(&depthShaderResourceViewDesc, sizeof(depthShaderResourceViewDesc));
+
+	depthShaderResourceViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	depthShaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	depthShaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	depthShaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+	result = _device->CreateShaderResourceView(_depthStencilBuffer, &depthShaderResourceViewDesc, &_depthStencilBufferSRV);
+	if (FAILED(result))
+	{
+		std::cout << "Failed to create depth shader resource view" << std::endl;
+	}
+
+
 	_context->OMSetRenderTargets(1, &_backbuffer, _depthStencilView);
 
 	// Set the viewport

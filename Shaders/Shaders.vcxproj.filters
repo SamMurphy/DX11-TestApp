@@ -26,4 +26,9 @@
       <Filter>Source Files</Filter>
     </FxCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="SSR.hlsli">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
