@@ -185,11 +185,6 @@ void Mesh::Draw(DirectXDevice* device)
 	{
 		device->GetContext()->PSSetShaderResources(1, 1, mTextureDetails[1].mTexture->GetAddressOfShaderResourceView());
 	}
-	else
-	{
-		ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
-		device->GetContext()->PSSetShaderResources(1, 1, nullSRV);
-	}
 
 	if (mpIndexBuffer && mIndices.size() > 0)
 	{

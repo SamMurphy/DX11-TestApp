@@ -29,7 +29,7 @@ bool RenderTarget::Initialise(DirectXDevice* device)
 		renderTargetViewDesc.Format = mFormat;
 		renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 		renderTargetViewDesc.Texture2D.MipSlice = 0;
-		HRESULT hr = Device->CreateRenderTargetView(mpTexture, 0, &mpRenderTargetView);
+		HRESULT hr = Device->CreateRenderTargetView(mpTexture, &renderTargetViewDesc, &mpRenderTargetView);
 		_ASSERT(hr == S_OK);
 		return (hr == S_OK);
 	}

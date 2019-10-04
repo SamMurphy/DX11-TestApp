@@ -30,7 +30,7 @@ bool Texture::Initialise(DirectXDevice* device)
 	textureDesc.Height = miHeight;
 	textureDesc.Format = mFormat;
 	if (miMipLevels > 1)
-		textureDesc.MipLevels = 0;
+		textureDesc.MipLevels = miMipLevels;
 	else
 		textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
@@ -63,11 +63,13 @@ bool Texture::Initialise(DirectXDevice* device)
 	_ASSERT(result == S_OK);
 
 	// Create shader resource view
-	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+	ZeroMemory(&shaderResourceViewDesc, sizeof(shaderResourceViewDesc));
 	shaderResourceViewDesc.Format = mFormat;
 	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	//result = device->GetDevice()->CreateShaderResourceView(mpTexture, &shaderResourceViewDesc, &mpTextureSRV);
-	result = device->GetDevice()->CreateShaderResourceView(mpTexture, NULL, &mpTextureSRV);
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceViewDesc.Texture2D.MipLevels = miMipLevels;
+	result = device->GetDevice()->CreateShaderResourceView(mpTexture, &shaderResourceViewDesc, &mpTextureSRV);
 	_ASSERT(result == S_OK);
 
 	return (result == S_OK);

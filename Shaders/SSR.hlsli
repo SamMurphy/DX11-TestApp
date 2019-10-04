@@ -12,6 +12,20 @@
 #define point2 vec2
 #define point3 vec3
 
+#define NEAR 0.1
+#define FAR 10000
+
+float lineariseDepth(float depth, float near_plane, float far_plane)
+{
+	depth = (depth - 1) * -1;
+	float ProjectionA = far_plane / (far_plane - near_plane);
+	float ProjectionB = (-far_plane * near_plane) / (far_plane - near_plane);
+
+	float linearDepth = ProjectionB / (depth - ProjectionA);
+	return linearDepth;
+}
+
+
 float distanceSquared(vec2 a, vec2 b) { a -= b; return dot(a, a); }
 
 // Returns true if the ray hit something
@@ -126,7 +140,8 @@ bool traceScreenSpaceRay1(
 		hitPixel = permute ? P.yx : P;
 		// You may need hitPixel.y = csZBufferSize.y - hitPixel.y; here if your vertical axis
 		// is different than ours in screen space
-		sceneZMax = texelFetch(csZBuffer, int2(hitPixel), 0);
+		sceneZMax = texelFetch(csZBuffer, int2(hitPixel), 0).r;
+		sceneZMax = lineariseDepth(sceneZMax, NEAR, FAR);
 	}
 
 	// Advance Q based on the number of steps

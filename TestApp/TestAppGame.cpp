@@ -367,19 +367,16 @@ void TestAppGame::Render(float deltaTime)
 	mpDirectX->GetContext()->VSSetShader(mpVertexShaderGBuffer, 0, 0);
 	mpDirectX->GetContext()->PSSetShader(mpPixelShaderGBuffer, 0, 0);
 
-	//mpDirectX->GetContext()->OMSetRenderTargets(1, mpRenderTargets[ColourBuffer]->GetAddressOfRenderTargetView(), mpDirectX->GetDepthStencilView());
 	mpDirectX->GetContext()->OMSetRenderTargets(GBUFFER_SIZE, mpGBuffer, mpDirectX->GetDepthStencilView());
-
 	mpDirectX->GetContext()->PSSetSamplers(0, 1, &mpSamplerState);
 
 	// Set camera
-	glm::vec4 cameraPosition = glm::vec4(0, 0, 0, 1);
 	PerFrameBuffer frameBuffer;
-	memcpy(&frameBuffer.PM, &mpCamera->GetProjectionMatrix()[0][0], sizeof(glm::mat4x4));
-	memcpy(&frameBuffer.PM_Inv, &(glm::inverse(mpCamera->GetProjectionMatrix()))[0][0], sizeof(glm::mat4x4));
 	memcpy(&frameBuffer.VM, &mpCamera->GetViewMatrix()[0][0], sizeof(glm::mat4x4));
 	memcpy(&frameBuffer.VM_Inv, &(glm::inverse(mpCamera->GetViewMatrix()))[0][0], sizeof(glm::mat4x4));
-	memcpy(&frameBuffer.CameraPosition, &cameraPosition[0], sizeof(glm::vec4));
+	memcpy(&frameBuffer.PM, &mpCamera->GetProjectionMatrix()[0][0], sizeof(glm::mat4x4));
+	memcpy(&frameBuffer.PM_Inv, &(glm::inverse(mpCamera->GetProjectionMatrix()))[0][0], sizeof(glm::mat4x4));
+	memcpy(&frameBuffer.CameraPosition, &glm::vec4(mpCamera->GetPosition(), 1.0f)[0], sizeof(glm::vec4));
 
 	D3D11_MAPPED_SUBRESOURCE ms1;
 	mpDirectX->GetContext()->Map(perFrameBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms1);
